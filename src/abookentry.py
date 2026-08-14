@@ -113,17 +113,25 @@ class AbookEntry:
         """
         return f"{self.fields}"
 
-    def to_abook_entry_string(self, header):
+
+    @staticmethod
+    def _to_abook_entry_string(fields, header):
         """
-        Convert entry to the abook addressbook format string, with header id.
+        Convert entry to the abook addressbook format string, with header.
         """
         lines = [f'[{header}]']
-        for key, value in self.fields.items():
+        for key, value in fields.items():
             if value:
                 if isinstance(value, list):
                     value = ','.join(value)
                 lines.append(f'{key}={value}')
         return '\n'.join(lines) + '\n\n'
+
+    def to_abook_entry_string(self, entry_id):
+        """
+        Convert entry to the abook addressbook format string, with header id.
+        """
+        return AbookEntry._to_abook_entry_string(self.fields, f'{entry_id}')
 
     def get_normalized_fields(self):
         """

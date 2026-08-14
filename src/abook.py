@@ -60,21 +60,15 @@ class Abook:
 
         return cls(entries=abook_entries)
 
-    def format_string(self, format_entry):
+    def format_string(self):
         """Create a string representation of the format entry."""
-        lines = ['[format]']
-        for key, value in self.format_entry.items():
-            if value:
-                if isinstance(value, list):
-                    value = ','.join(value)
-                lines.append(f'{key}={value}')
-        return '\n'.join(lines) + '\n\n'
+        return AbookEntry._to_abook_entry_string(self.format_entry, 'format')
 
     def write_to_file(self, file_path):
         """Convert a list of dictionaries to an abook addressbook file."""
         with open(file_path, 'w') as f:
             if self.format_entry:
-                f.write(self.format_string(self.format_entry))
+                f.write(self.format_string())
             for i, entry in enumerate(self.entries):
                 f.write(entry.to_abook_entry_string(i))
 
