@@ -13,8 +13,7 @@ class Abook:
     def from_abook_file(cls, file_path):
         """Read the abook addressbook and populate entries."""
         with open(file_path, 'r') as f:
-            # Add a dummy line to ensure the last entry is processed
-            lines = f.readlines() + ['[dummy]']
+            lines = f.readlines()
 
         entries = []
         current_entry = {}
@@ -39,6 +38,11 @@ class Abook:
                 if key in AbookEntry.list_fields:
                     value = value.split(',')
                 current_entry[key] = value
+        if current_entry:
+            if is_format:
+                format_entry = current_entry
+            else:
+                entries.append(AbookEntry(current_entry))
 
         return cls(entries=entries, format_entry=format_entry)
 
