@@ -16,9 +16,7 @@ class AbookEntry:
     ]
 
     class MatchType(Enum):
-        """
-        Enum for match types when comparing entries.
-        """
+        """ Enum for match types when comparing entries. """
         UNMATCHED = 0
         PARTIAL_MATCH = 1
         FULL_MATCH = 2

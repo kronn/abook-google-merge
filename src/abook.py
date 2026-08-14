@@ -3,7 +3,7 @@ from src.abookentry import AbookEntry
 
 
 class Abook:
-    """A class to represent an abook addressbook."""
+    """An abook addressbook."""
 
     def __init__(self, entries=None, format_entry=None):
         self.entries = entries if entries is not None else []
@@ -11,7 +11,7 @@ class Abook:
 
     @classmethod
     def from_abook_file(cls, file_path):
-        """Read the abook addressbook file and populate entries."""
+        """Read the abook addressbook and populate entries."""
         with open(file_path, 'r') as f:
             # Add a dummy line to ensure the last entry is processed
             lines = f.readlines() + ['[dummy]']
@@ -20,9 +20,7 @@ class Abook:
         current_entry = {}
         format_entry = None
         is_format = False
-        for line in lines:
-            line = line.strip()
-
+        for line in map(str.strip, lines):
             # Ignore comments and empty lines
             if not line or line.startswith('#'):
                 continue
@@ -54,9 +52,7 @@ class Abook:
                 {k: ','.join(v.split(' ::: ')) for k, v in row.items() if v}
                 for row in reader
             ]
-        abook_entries = [
-            AbookEntry.from_google_entry(entry) for entry in entries
-        ]
+        abook_entries = list(map(AbookEntry.from_google_entry, entries))
 
         return cls(entries=abook_entries)
 
@@ -65,7 +61,7 @@ class Abook:
         return AbookEntry._to_abook_entry_string(self.format_entry, 'format')
 
     def write_to_file(self, file_path):
-        """Convert a list of dictionaries to an abook addressbook file."""
+        """Write the abook entries to a file in the abook format."""
         with open(file_path, 'w') as f:
             if self.format_entry:
                 f.write(self.format_string())
@@ -89,7 +85,7 @@ class Abook:
             return AbookEntry.MatchType.UNMATCHED, None
 
     def update_entries(self, other_abook):
-        """Update abook entries with information from google entries."""
+        """Update abook entries with information from another abook."""
         for other_entry in other_abook.entries:
             if not other_entry.fields.get('name') or not any(
                 other_entry.fields.get(field)
