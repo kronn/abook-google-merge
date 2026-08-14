@@ -90,20 +90,24 @@ class AbookEntry:
     def normalize_phone(phone):
         return ''.join(filter(str.isdigit, phone))
 
-    def add_email(self, email: str):
+    def add_email_if_new(self, email: str, label: str = 'email'):
         """
         Safely append a new email, updating both the raw list and the set.
         """
-        self.fields['email'].append(email)
-        self._normalized_emails.add(AbookEntry.normalize_email(email))
+        normalized_email = AbookEntry.normalize_email(email)
+        if normalized_email not in self._normalized_emails:
+            self.fields.setdefault(label, []).append(email)
+            self._normalized_emails.add(normalized_email)
 
-    def add_phone(self, phone: str, label: str):
+    def add_phone_if_new(self, phone: str, label: str):
         """
         Safely append a new phone number to a specific label,
         updating both the raw list and the set.
         """
-        self.fields[label].append(phone)
-        self._normalized_phones.add(AbookEntry.normalize_phone(phone))
+        normalized_phone = AbookEntry.normalize_phone(phone)
+        if normalized_phone not in self._normalized_phones:
+            self.fields.setdefault(label, []).append(phone)
+            self._normalized_phones.add(normalized_phone)
 
     def __str__(self):
         """
@@ -191,16 +195,10 @@ class AbookEntry:
                 self.fields['name'] = other_entry.fields['name']
                 self._normalized_name = other_entry._normalized_name
 
-        for group, group_set, group_normalizer in zip(
-            [AbookEntry.email_fields, AbookEntry.phone_fields],
-            [self._normalized_emails, self._normalized_phones],
-            [AbookEntry.normalize_email, AbookEntry.normalize_phone]
-        ):
-            for key in group:
-                # Do not change original order, only append new values
-                # Do not add item that exists even in a different field
-                for value in other_entry.fields.get(key, []):
-                    normalized_value = group_normalizer(value)
-                    if normalized_value not in group_set:
-                        self.fields.setdefault(key, []).append(value)
-                        group_set.add(normalized_value)
+        for key in AbookEntry.email_fields:
+            for value in other_entry.fields.get(key, []):
+                self.add_email_if_new(value, key)
+
+        for key in AbookEntry.phone_fields:
+            for value in other_entry.fields.get(key, []):
+                self.add_phone_if_new(value, key)
