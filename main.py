@@ -3,6 +3,9 @@
 import csv
 import os
 import shutil
+from argparse import ArgumentParser, ArgumentTypeError
+from pathlib import Path
+from src.abookentry import AbookEntry
 
 
 def read_abook_to_entrylist(file_path):
@@ -159,17 +162,54 @@ def update_abook_entries(abook_entries, google_entries):
                 print("Entry added.")
 
 
+def resolve_path(path_str: str) -> Path:
+    """
+    Expands user tildes and resolves the string to an absolute path.
+    Used for output files that might not exist yet.
+    """
+    return Path(path_str).expanduser().resolve()
+
+
+def existing_file(path_str: str) -> Path:
+    """
+    Expands the path and enforces early boundary validation to ensure
+    the file actually exists on the disk before the script continues.
+    """
+    path = resolve_path(path_str)
+    if not path.is_file():
+        raise ArgumentTypeError(
+            f"The file '{path}' does not exist or is not a file.")
+    return path
+
+
 if __name__ == "__main__":
+    arg_parser = ArgumentParser(
+        prog='abook_google_merge',
+        description='Update abook addressbook with missing entries'
+        'from a google contacts csv file.'
+    )
+    arg_parser.add_argument(
+        '-i', '--input', type=existing_file, default='~/.abook/addressbook',
+        help='Path to the abook file (default: ~/.abook/addressbook)'
+    )
+    arg_parser.add_argument(
+        '-g', '--google', type=existing_file, default='google.csv',
+        help='Path to the google contacts csv file (default: google.csv)'
+    )
+    arg_parser.add_argument(
+        '-o', '--output', type=str, default=None,
+        help='Path to the output abook file (default: overwrite input file)'
+    )
+    args = arg_parser.parse_args()
+    if args.output is None:
+        args.output = args.input
+
     # Read the abook addressbook file
-    abook_file_path = os.path.expanduser("~/.abook/addressbook")
-    format_entry, abook_entries = read_abook_to_entrylist(abook_file_path)
+    format_entry, abook_entries = read_abook_to_entrylist(args.input)
     print(f"Read {len(abook_entries)} entries from abook addressbook.")
 
     # Read the google contacts csv file and convert to simplified abook format
-    google_contacts_file_path = os.path.expanduser("/tmp/contacts.csv")
-    google_entries = read_google_contacts_to_dictlist(
-        google_contacts_file_path
-    )
+    google_entries = read_google_contacts_to_dictlist(args.google)
     google_abook_entries = [
         AbookEntry.from_google_entry(entry) for entry in google_entries
     ]
@@ -178,9 +218,9 @@ if __name__ == "__main__":
     # Update the abook entries with information from the google contacts
     update_abook_entries(abook_entries, google_abook_entries)
 
-    # Write the updated abook entries back to the addressbook file
-    # First create a backup of the original addressbook file
-    # Use cp to backup + overwrite original to deal with symlinks
-    backup_file_path = abook_file_path + ".bak"
-    shutil.copy(abook_file_path, backup_file_path)
-    write_dictlist_to_abook(abook_file_path, format_entry, abook_entries)
+    # Write the updated abook entries to the output file
+    if args.output == args.input:
+        # First create a backup of the original addressbook file
+        # Use cp to backup + overwrite original to deal with symlinks
+        shutil.copy(args.input, args.input.with_suffix('.bak'))
+    write_dictlist_to_abook(args.output, format_entry, abook_entries)
