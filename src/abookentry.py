@@ -90,6 +90,13 @@ class AbookEntry:
     def normalize_phone(phone):
         return ''.join(filter(str.isdigit, phone))
 
+    def update_name(self, new_name):
+        """
+        Update the name field and its normalized version.
+        """
+        self.fields['name'] = new_name
+        self._normalized_name = AbookEntry.normalize_name(new_name)
+
     def add_email_if_new(self, email: str, label: str = 'email'):
         """
         Safely append a new email, updating both the raw list and the set.
@@ -162,15 +169,6 @@ class AbookEntry:
         """
         return AbookEntry._to_abook_entry_string(self.fields, f'{entry_id}')
 
-    def get_normalized_fields(self):
-        """
-        Return a dictionary of normalized fields for matching purposes.
-        """
-        return (
-            self._normalized_name,
-            self._normalized_emails, self._normalized_phones
-        )
-
     def update_entry(self, other_entry):
         """
         Update the current entry with information from another entry.
@@ -192,8 +190,7 @@ class AbookEntry:
                 if user_input == 'y':
                     change_name = True
             if change_name:
-                self.fields['name'] = other_entry.fields['name']
-                self._normalized_name = other_entry._normalized_name
+                self.update_name(other_entry.fields['name'])
 
         for key in AbookEntry.email_fields:
             for value in other_entry.fields.get(key, []):
