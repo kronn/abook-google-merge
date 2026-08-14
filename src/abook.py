@@ -72,25 +72,15 @@ class Abook:
             for i, entry in enumerate(self.entries):
                 f.write(entry.to_abook_entry_string(i))
 
-    def find_matching_abook_entries(self, google_entry):
-        """Find a matching abook entry for a given google entry."""
-        (
-            google_name, google_emails, google_phones
-        ) = google_entry.get_normalized_fields()
+    def find_matching_abook_entries(self, other_entry):
+        """Find matching abook entries for an entry from another abook."""
         matching_entries = []
 
         for entry in self.entries:
-            name, emails, phones = entry.get_normalized_fields()
-            name_match = google_name and name and google_name == name
-            email_match_count = len(google_emails.intersection(emails))
-            phone_match_count = len(google_phones.intersection(phones))
-
-            if (
-                name_match and email_match_count == len(google_emails) and
-                phone_match_count == len(google_phones)
-            ):
+            match = entry.get_match(other_entry)
+            if match == AbookEntry.MatchType.FULL_MATCH:
                 return AbookEntry.MatchType.FULL_MATCH, entry
-            elif name_match or email_match_count > 0 or phone_match_count > 0:
+            elif match == AbookEntry.MatchType.PARTIAL_MATCH:
                 matching_entries.append(entry)
 
         if matching_entries:

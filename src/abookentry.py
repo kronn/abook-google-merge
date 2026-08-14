@@ -113,6 +113,33 @@ class AbookEntry:
         """
         return f"{self.fields}"
 
+    def get_match(self, other):
+        """
+        Compare this entry with another entry and return the match type.
+        """
+        name_match = (
+            other._normalized_name and self._normalized_name and
+            other._normalized_name == self._normalized_name
+        )
+        email_match_count = len(
+            other._normalized_emails.intersection(
+                self._normalized_emails
+            )
+        )
+        phone_match_count = len(
+            other._normalized_phones.intersection(self._normalized_phones)
+        )
+
+        if (
+            name_match and
+            email_match_count == len(other._normalized_emails) and
+            phone_match_count == len(other._normalized_phones)
+        ):
+            return AbookEntry.MatchType.FULL_MATCH
+        elif name_match or email_match_count > 0 or phone_match_count > 0:
+            return AbookEntry.MatchType.PARTIAL_MATCH
+        else:
+            return AbookEntry.MatchType.UNMATCHED
 
     @staticmethod
     def _to_abook_entry_string(fields, header):
