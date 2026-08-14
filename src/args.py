@@ -41,7 +41,7 @@ def parse_args():
         help='Path to the google contacts csv file (default: google.csv)'
     )
     arg_parser.add_argument(
-        '-o', '--output', type=str, default=None,
+        '-o', '--output', type=resolve_path, default=None,
         help='Path to the output abook file (default: overwrite input file)'
     )
     args = arg_parser.parse_args()
