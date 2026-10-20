@@ -137,7 +137,10 @@ class Abook:
                         entry_to_update = matching_entries[0]
                     else:
                         print("Select the entry number to update:")
-                        entry_number = int(input().strip()) - 1
+                        try:
+                            entry_number = int(input().strip()) - 1
+                        except ValueError:
+                            entry_number = -1
                         if 0 <= entry_number < len(matching_entries):
                             entry_to_update = matching_entries[entry_number]
                         else:
