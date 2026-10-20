@@ -151,3 +151,5 @@ class Abook:
                 elif user_input == 'a':
                     self.entries.append(other_entry)
                     print("Entry added.")
+                else:
+                    print("Entry skipped.")
