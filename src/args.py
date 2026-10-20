@@ -44,7 +44,23 @@ def parse_args():
         '-o', '--output', type=resolve_path, default=None,
         help='Path to the output abook file (default: overwrite input file)'
     )
+    arg_parser.add_argument(
+        '-p', '--partially-matched', type=str.lower,
+        choices=['u', 'update', 'a', 'add', 's', 'skip'], default=None,
+        help='Action for partially matched entries instead of asking; '
+             '"update" still asks which entry if several match (default: ask)'
+    )
+    arg_parser.add_argument(
+        '-u', '--unmatched', type=str.lower,
+        choices=['a', 'add', 's', 'skip'], default=None,
+        help='Action for unmatched entries instead of asking (default: ask)'
+    )
     args = arg_parser.parse_args()
     if args.output is None:
         args.output = args.input
+    # Reduce long action names to their initial letter
+    if args.partially_matched:
+        args.partially_matched = args.partially_matched[0]
+    if args.unmatched:
+        args.unmatched = args.unmatched[0]
     return args

@@ -88,8 +88,15 @@ class Abook:
         else:
             return AbookEntry.MatchType.UNMATCHED, None
 
-    def update_entries(self, other_abook):
-        """Update abook entries with information from another abook."""
+    def update_entries(
+        self, other_abook, partial_action=None, unmatched_action=None
+    ):
+        """
+        Update abook entries with information from another abook.
+        partial_action ('u'/'a'/'s') and unmatched_action ('a'/'s') answer
+        the respective questions automatically; None means ask the user.
+        'u' with several matching entries still asks which one to update.
+        """
         for other_entry in other_abook.entries:
             if not other_entry.fields.get('name') or not any(
                 other_entry.fields.get(field)
@@ -102,9 +109,12 @@ class Abook:
 
             if match_type == AbookEntry.MatchType.UNMATCHED:
                 print(f"Unmatched entry: {other_entry}")
-                print("Do you want to add this entry to abook? (y/n)")
-                user_input = input().strip().lower()
-                if user_input == 'y':
+                if unmatched_action:
+                    add_entry = unmatched_action == 'a'
+                else:
+                    print("Do you want to add this entry to abook? (y/n)")
+                    add_entry = input().strip().lower() == 'y'
+                if add_entry:
                     self.entries.append(other_entry)
                     print("Entry added.")
                 else:
@@ -114,11 +124,14 @@ class Abook:
                 print("Matching entries:")
                 for i, entry in enumerate(matching_entries):
                     print(f"{i + 1}: {entry}")
-                print(
-                    "Do you want to update an existing entry or add a new one?"
-                    " (u/a/n)"
-                )
-                user_input = input().strip().lower()
+                if partial_action:
+                    user_input = partial_action
+                else:
+                    print(
+                        "Do you want to update an existing entry"
+                        " or add a new one? (u/a/n)"
+                    )
+                    user_input = input().strip().lower()
                 if user_input == 'u':
                     if len(matching_entries) == 1:
                         entry_to_update = matching_entries[0]

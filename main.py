@@ -16,7 +16,11 @@ if __name__ == "__main__":
     print(f"Read {len(google.entries)} entries from google contacts.")
 
     # Update the abook entries with information from the google contacts
-    abook.update_entries(google)
+    abook.update_entries(
+        google,
+        partial_action=args.partially_matched,
+        unmatched_action=args.unmatched
+    )
 
     # Write the updated abook entries to the output file
     if args.output == args.input:

@@ -21,13 +21,21 @@ No build step is needed, just run the script directly with Python.
 ## Usage
 ```
 Usage: python3 main.py [-h] [-i <abook file>] [-g <google csv file>] [-o <output file>]
+                       [-p {u,update,a,add,s,skip}] [-u {a,add,s,skip}]
 
 Options:
   -h, --help          Show this message and exit
   -i, --input  INPUT  Path to the abook file (default: ~/.abook/addressbook)
   -g, --google GOOGLE Path to the google contacts csv file (default: google.csv)
   -o, --output OUTPUT Path to the output file (default: overwrite the input file)
+  -p, --partially-matched ACTION
+                      Update, add or skip partial matches automatically
+                      (update still asks which entry if several match)
+  -u, --unmatched ACTION
+                      Add or skip unmatched entries without asking
 ```
+
+Without `-p` / `-u` you are asked for every partially matched or unmatched entry.
 
 ## Functionality
 
